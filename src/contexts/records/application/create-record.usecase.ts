@@ -1,23 +1,26 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { CreateRecordRequestDTO } from '../../../api/dtos/create-record.request.dto';
-import { Record } from '../../../api/schemas/record.schema';
+import { RecordModel } from '../domain/models/record.model';
 import {
   RECORDS_REPOSITORY,
   RecordsRepository,
-} from '../../records/domain/repositories/records.repository';
+} from '../domain/repositories/records.repository';
+import { CreateRecordInput } from './dtos/create-record.input';
+import { UpdateRecordInput } from './dtos/update-record.input';
+import { RecordOutput } from './outputs/record.output';
 
 @Injectable()
 export class CreateRecordUseCase {
   constructor(
     @Inject(RECORDS_REPOSITORY)
     private readonly repo: RecordsRepository<
-      Record,
-      CreateRecordRequestDTO,
-      any
+      RecordModel,
+      CreateRecordInput,
+      UpdateRecordInput
     >,
   ) {}
 
-  async execute(dto: CreateRecordRequestDTO): Promise<Record> {
-    return this.repo.create(dto);
+  async execute(dto: CreateRecordInput): Promise<RecordOutput> {
+    const created = await this.repo.create(dto);
+    return RecordOutput.fromModel(created);
   }
 }

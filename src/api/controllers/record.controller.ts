@@ -1,20 +1,20 @@
 import {
+  Body,
   Controller,
   Get,
-  Post,
-  Body,
-  Param,
-  Query,
-  Put,
   InternalServerErrorException,
+  Param,
+  Post,
+  Put,
+  Query,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Record } from '../schemas/record.schema';
-import { Model } from 'mongoose';
 import { ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { FilterQuery, Model } from 'mongoose';
 import { CreateRecordRequestDTO } from '../dtos/create-record.request.dto';
-import { RecordCategory, RecordFormat } from '../schemas/record.enum';
 import { UpdateRecordRequestDTO } from '../dtos/update-record.request.dto';
+import { RecordCategory, RecordFormat } from '../schemas/record.enum';
+import { Record } from '../schemas/record.schema';
 
 @Controller('records')
 export class RecordController {
@@ -101,45 +101,75 @@ export class RecordController {
     enum: RecordCategory,
     type: String,
   })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    description: 'Page number for pagination (default: 1)',
+    type: Number,
+  })
+  @ApiQuery({
+    name: 'pageSize',
+    required: false,
+    description: 'Page size for pagination (default: 20)',
+    type: Number,
+  })
+  @ApiQuery({
+    name: 'sort',
+    required: false,
+    description: 'Sort by: relevance (text search), price, or created',
+    enum: ['relevance', 'price', 'created'],
+  })
   async findAll(
     @Query('q') q?: string,
     @Query('artist') artist?: string,
     @Query('album') album?: string,
     @Query('format') format?: RecordFormat,
     @Query('category') category?: RecordCategory,
+    @Query('page') page: number = 1,
+    @Query('pageSize') pageSize: number = 20,
+    @Query('sort') sort: 'relevance' | 'price' | 'created' = 'relevance',
   ): Promise<Record[]> {
-    const allRecords = await this.recordModel.find().exec();
+    const query: FilterQuery<Record> = {};
 
-    const filteredRecords = allRecords.filter((record) => {
-      let match = true;
+    if (artist) query.artist = new RegExp(artist, 'i');
+    if (album) query.album = new RegExp(album, 'i');
+    if (format) query.format = format;
+    if (category) query.category = category;
+    if (q) query.$text = { $search: q } as any;
 
-      if (q) {
-        match =
-          match &&
-          (record.artist.includes(q) ||
-            record.album.includes(q) ||
-            record.category.includes(q));
-      }
+    const projection = q
+      ? {
+          score: { $meta: 'textScore' },
+          artist: 1,
+          album: 1,
+          price: 1,
+          qty: 1,
+          format: 1,
+          category: 1,
+        }
+      : {
+          artist: 1,
+          album: 1,
+          price: 1,
+          qty: 1,
+          format: 1,
+          category: 1,
+        };
 
-      if (artist) {
-        match = match && record.artist.includes(artist);
-      }
+    let cursor = this.recordModel.find(query, projection).lean();
+    if (sort === 'relevance' && q) {
+      cursor = cursor.sort({ score: { $meta: 'textScore' } });
+    } else if (sort === 'price') {
+      cursor = cursor.sort({ price: 1 });
+    } else if (sort === 'created') {
+      cursor = cursor.sort({ created: -1 });
+    }
 
-      if (album) {
-        match = match && record.album.includes(album);
-      }
+    const results = await cursor
+      .skip((Number(page) - 1) * Number(pageSize))
+      .limit(Number(pageSize))
+      .exec();
 
-      if (format) {
-        match = match && record.format === format;
-      }
-
-      if (category) {
-        match = match && record.category === category;
-      }
-
-      return match;
-    });
-
-    return filteredRecords;
+    return results as any;
   }
 }

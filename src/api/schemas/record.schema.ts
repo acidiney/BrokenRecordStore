@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import { RecordFormat, RecordCategory } from './record.enum';
+import { RecordCategory, RecordFormat } from './record.enum';
 
 @Schema({ timestamps: true })
 export class Record extends Document {
@@ -32,4 +32,24 @@ export class Record extends Document {
   mbid?: string;
 }
 
+export type RecordDocument = Record;
+
 export const RecordSchema = SchemaFactory.createForClass(Record);
+
+RecordSchema.index(
+  {
+    artist: 'text',
+    album: 'text',
+  },
+  {
+    weights: { artist: 5, album: 4 },
+    name: 'text_artist_album',
+  },
+);
+
+RecordSchema.index({ category: 1, price: 1 }, { name: 'idx_category_price' });
+
+RecordSchema.index({ price: 1 }, { name: 'idx_price_asc' });
+RecordSchema.index({ format: 1 }, { name: 'idx_format' });
+RecordSchema.index({ created: -1 }, { name: 'idx_created_desc' });
+RecordSchema.index({ lastModified: -1 }, { name: 'idx_lastModified_desc' });

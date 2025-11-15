@@ -7,7 +7,7 @@ import {
   RECORDS_REPOSITORY,
   RecordsRepository,
 } from '../domain/repositories/records.repository';
-import { CreateRecordInput } from './dtos/create-record.input';
+import { CreateRecordInput } from './inputs/create-record.input';
 import { RecordOutput } from './outputs/record.output';
 
 @Injectable()

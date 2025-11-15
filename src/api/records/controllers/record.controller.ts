@@ -5,8 +5,8 @@ import { CreateRecordRequestDTO } from '../dtos/create-record.request.dto';
 import { UpdateRecordRequestDTO } from '../dtos/update-record.request.dto';
 
 import { CreateRecordUseCase } from '@/contexts/records/application/create-record.usecase';
-import { CreateRecordInput } from '@/contexts/records/application/dtos/create-record.input';
-import { UpdateRecordInput } from '@/contexts/records/application/dtos/update-record.input';
+import { CreateRecordInput } from '@/contexts/records/application/inputs/create-record.input';
+import { UpdateRecordInput } from '@/contexts/records/application/inputs/update-record.input';
 import { ListRecordsUseCase } from '@/contexts/records/application/list-records.usecase';
 import { RecordOutput } from '@/contexts/records/application/outputs/record.output';
 import { UpdateRecordUseCase } from '@/contexts/records/application/update-record.usecase';

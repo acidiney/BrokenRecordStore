@@ -85,6 +85,6 @@ export class UpdateRecordRequestDTO {
     required: false,
   })
   @IsOptional()
-  @Transform(({ value }) => MBID.from(value))
+  @Transform(({ value }) => (value ? MBID.from(value) : undefined))
   mbid?: MBID;
 }

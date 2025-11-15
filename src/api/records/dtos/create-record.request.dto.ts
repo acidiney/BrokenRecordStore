@@ -77,6 +77,6 @@ export class CreateRecordRequestDTO {
     example: 'b10bbbfc-cf9e-42e0-be17-e2c3e1d2600d',
   })
   @IsOptional()
-  @Transform(({ value }) => MBID.from(value))
+  @Transform(({ value }) => (value ? MBID.from(value) : undefined))
   mbid?: MBID;
 }

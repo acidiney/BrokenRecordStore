@@ -1,3 +1,5 @@
+import { BadRequestException } from '@nestjs/common';
+
 export class MBID {
   private constructor(private readonly raw: string) {}
 
@@ -5,7 +7,7 @@ export class MBID {
     const v = value?.trim();
 
     if (!v || !MBID.isValid(v)) {
-      throw new Error('Invalid MBID format');
+      throw new BadRequestException('Invalid MBID format');
     }
     return new MBID(v.toLowerCase());
   }

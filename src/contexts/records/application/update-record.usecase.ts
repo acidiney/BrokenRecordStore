@@ -48,6 +48,6 @@ export class UpdateRecordUseCase {
 
     await this.repo.updateById(id, updatedDto);
 
-    return RecordOutput.fromModel(updatedDto);
+    return RecordOutput.fromModel(await this.recordReadRepository.findById(id));
   }
 }

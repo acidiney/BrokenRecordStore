@@ -183,17 +183,49 @@
 
 
     <section x-show="page==='orders'" class="bg-gray-800 border border-gray-700 rounded-lg p-6 mb-6">
-      <h2>Orders</h2>
-      <label class="block text-sm font-medium">Record
-        <select class="mt-1 block w-full bg-gray-900 border border-gray-700 rounded-md px-3 py-2 text-gray-100" x-model="order.recordId">
-          <template x-for="r in records" :key="r.id ">
-            <option :value="r.id " x-text="r.artist + ' - ' + r.album"></option>
-          </template>
-        </select>
-      </label>
-      <label class="block text-sm font-medium">Quantity<input class="mt-1 block w-full bg-gray-900 border border-gray-700 rounded-md px-3 py-2 text-gray-100" type="number" x-model.number="order.quantity"></label>
-      <button class="inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded" @click="createOrder">Create Order</button>
-      <div class="mt-2 text-sm" :class="orderStatus.includes('Order created') ? 'text-green-400' : (orderStatus ? 'text-red-400' : 'text-gray-400')" x-text="orderStatus || ''"></div>
+      <h2 class="mb-4">Orders</h2>
+      <div class="grid grid-cols-1 md:grid-cols-1 gap-6">
+        <div>
+          <label class="block text-sm font-medium">Record</label>
+          <div class="relative">
+            <button type="button" class="mt-1 w-full bg-gray-900 border border-gray-700 rounded-md px-3 py-2 text-gray-100 text-left flex items-center justify-between" @click="openOrderRecordSelect">
+              <span x-text="orderRecordSelected ? (orderRecordSelected.artist + ' - ' + orderRecordSelected.album) : 'Select a record'"></span>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 text-gray-300"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.25 8.29a.75.75 0 01-.02-1.08z" clip-rule="evenodd"/></svg>
+            </button>
+            <div x-cloak x-show="orderRecordOpen" x-transition.opacity class="absolute z-50 mt-2 w-full bg-gray-800 border border-gray-700 rounded-md shadow-xl" @click.outside="closeOrderRecordSelect">
+              <div class="p-2 w-full">
+                <input type="text" class="block w-full max-w-none bg-gray-900 border border-gray-700 rounded-md px-2 py-1 text-gray-100" placeholder="Search records..." x-model="orderRecordSearch" @input="onOrderRecordSearchInput">
+              </div>
+              <div class="max-h-64 overflow-auto" @scroll.passive="onOrderRecordScroll">
+                <template x-for="r in orderRecordOptions" :key="r.id">
+                  <div class="px-3 py-2 hover:bg-gray-700 cursor-pointer flex items-center justify-between" @click="selectOrderRecord(r)">
+                    <span x-text="r.artist + ' - ' + r.album"></span>
+                    <span class="text-xs text-gray-400" x-text="r.format"></span>
+                  </div>
+                </template>
+                <div class="px-3 py-2 text-sm text-gray-400" x-show="orderRecordLoading">Loading...</div>
+                <div class="px-3 py-2 text-sm text-gray-400" x-show="!orderRecordLoading && orderRecordOptions.length===0">No results</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="bg-gray-900 border border-gray-700 rounded-md p-4">
+            <div class="text-sm text-gray-400 mb-2">Selected</div>
+            <div x-show="orderRecordSelected" class="mb-4">
+              <div class="font-medium" x-text="orderRecordSelected ? (orderRecordSelected.artist + ' - ' + orderRecordSelected.album) : ''"></div>
+              <div class="text-xs text-gray-400" x-text="orderRecordSelected ? (orderRecordSelected.format + (orderRecordSelected.price ? (' • $' + orderRecordSelected.price) : '')) : ''"></div>
+            </div>
+            <label class="block text-sm font-medium">Quantity
+              <input class="mt-1 block w-full bg-gray-900 border border-gray-700 rounded-md px-3 py-2 text-gray-100" type="number" x-model.number="order.quantity" min="1">
+            </label>
+            <div class="flex items-center justify-end gap-3 mt-4">
+              <button class="inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded disabled:opacity-50 disabled:cursor-not-allowed" :disabled="!order.recordId || !order.quantity" @click="createOrder">Create Order</button>
+            </div>
+            <div class="mt-2 text-sm" :class="orderStatus.includes('Order created') ? 'text-green-400' : (orderStatus ? 'text-red-400' : 'text-gray-400')" x-text="orderStatus || ''"></div>
+          </div>
+        </div>
+      </div>
     </section>
 
     <div x-cloak x-show="showEditModal" x-transition.opacity @keydown.escape.window="showEditModal=false" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" @click="showEditModal=false">
@@ -322,6 +354,14 @@
         cr: { artist: '', album: '', price: '', qty: '', format: 'Vinyl', category: 'Rock', mbid: '' },
         er: { id: '', artist: '', album: '', price: '', qty: '', format: 'Vinyl', category: 'Rock', mbid: '' },
         order: { recordId: '', quantity: '' },
+        orderRecordOpen: false,
+        orderRecordSearch: '',
+        orderRecordOptions: [],
+        orderRecordPage: 1,
+        orderRecordTotalPages: 1,
+        orderRecordLoading: false,
+        orderRecordSelected: null,
+        orderRecordSearchTimer: null,
         async load(){
           try{
             this.loading = true;
@@ -360,6 +400,30 @@
           this.expanded = Object.assign({}, this.expanded, { [id]: next });
         },
         openTrackSlider(r){ this.selectedTrackRecord = r; this.showTrackSlider = true; },
+        openOrderRecordSelect(){ this.orderRecordOpen = true; this.orderRecordOptions = []; this.orderRecordPage = 1; this.orderRecordTotalPages = 1; this.loadOrderRecords(); },
+        closeOrderRecordSelect(){ this.orderRecordOpen = false; },
+        async loadOrderRecords(){
+          if(this.orderRecordLoading) return;
+          if(this.orderRecordPage > this.orderRecordTotalPages) return;
+          this.orderRecordLoading = true;
+          const params = new URLSearchParams();
+          params.set('page', String(this.orderRecordPage));
+          params.set('pageSize', '20');
+          const q = (this.orderRecordSearch || '').trim();
+          if(q) params.set('q', q);
+          const r = await fetch('/records?' + params.toString());
+          const json = await r.json();
+          const items = Array.isArray(json.data) ? json.data : [];
+          this.orderRecordOptions = this.orderRecordOptions.concat(items);
+          const total = Number(json.total || 0);
+          const perPage = Number(json.perPage || 20);
+          this.orderRecordTotalPages = Math.max(1, Math.ceil(total / perPage));
+          this.orderRecordPage++;
+          this.orderRecordLoading = false;
+        },
+        onOrderRecordScroll(e){ const el = e.target; if(el.scrollTop + el.clientHeight >= el.scrollHeight - 32){ this.loadOrderRecords(); } },
+        selectOrderRecord(r){ this.order.recordId = r.id; this.orderRecordSelected = r; this.orderRecordOpen = false; },
+        onOrderRecordSearchInput(){ if(this.orderRecordSearchTimer){ clearTimeout(this.orderRecordSearchTimer); } this.orderRecordSearchTimer = setTimeout(() => { this.orderRecordOptions = []; this.orderRecordPage = 1; this.orderRecordTotalPages = 1; this.loadOrderRecords(); }, 200); },
         selectRecord(r){
           const id = r.id ;
           this.er = { id, artist: r.artist||'', album: r.album||'', price: r.price||'', qty: r.qty||'', format: r.format||'Vinyl', category: r.category||'Rock', mbid: r.mbid||'' };

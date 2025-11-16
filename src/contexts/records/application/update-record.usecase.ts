@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Inject,
   Injectable,
   InternalServerErrorException,
@@ -43,10 +42,6 @@ export class UpdateRecordUseCase {
 
     if (dto.mbid && !dto.mbid?.equals(record.mbid)) {
       tracklist = await this.metadata.fetchTracklistByMbid(dto.mbid);
-
-      if (tracklist.length === 0) {
-        throw new BadRequestException('Tracklist not found');
-      }
     }
 
     const updatedDto = Object.assign(record, dto, {

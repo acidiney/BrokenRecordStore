@@ -1,9 +1,4 @@
-import {
-  BadRequestException,
-  ConflictException,
-  Inject,
-  Injectable,
-} from '@nestjs/common';
+import { ConflictException, Inject, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
   RECORDS_READ_REPOSITORY,
@@ -47,10 +42,6 @@ export class CreateRecordUseCase {
 
     if (dto.mbid) {
       tracklist = await this.metadata.fetchTracklistByMbid(dto.mbid);
-
-      if (tracklist.length === 0) {
-        throw new BadRequestException('Tracklist not found');
-      }
     }
 
     const created = await this.repo.create({ ...dto, tracklist });

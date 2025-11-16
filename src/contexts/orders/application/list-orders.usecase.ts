@@ -19,6 +19,7 @@ export class ListOrdersUseCase {
     pageSize: number = 20,
   ): Promise<OrdersPageOutput> {
     const items: OrderModel[] = await this.repo.findAll(page, pageSize);
+
     const total = await this.repo.count();
     return {
       page,

@@ -49,8 +49,11 @@ export class MongoOrdersRepository implements OrdersRepository {
     const unitPrice = existing.price;
     const totalPrice = unitPrice * quantity;
 
+    const recordTitle = `${existing.artist} - ${existing.album}`;
+
     const created = await this.orderModel.create({
       recordId: new Types.ObjectId(recordId) as any,
+      recordTitle,
       quantity,
       unitPrice,
       totalPrice,
@@ -59,6 +62,7 @@ export class MongoOrdersRepository implements OrdersRepository {
     return {
       id: created._id.toString(),
       recordId: created.recordId.toString() as any,
+      recordTitle: created.recordTitle,
       quantity: created.quantity,
       unitPrice: created.unitPrice,
       totalPrice: created.totalPrice,
@@ -93,7 +97,8 @@ export class MongoOrdersRepository implements OrdersRepository {
       .exec();
     return results.map((o: any) => ({
       id: o._id.toString(),
-      recordId: o.recordId?.toString?.() || String(o.recordId),
+      recordId: o.recordId,
+      recordTitle: o.recordTitle,
       quantity: o.quantity,
       unitPrice: o.unitPrice,
       totalPrice: o.totalPrice,

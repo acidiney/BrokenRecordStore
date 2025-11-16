@@ -243,7 +243,7 @@
           <tbody>
             <template x-for="o in orders" :key="o.id">
               <tr>
-                <td class="border-t border-gray-700 px-3 py-2" x-text="o.recordId"></td>
+                <td class="border-t border-gray-700 px-3 py-2" x-text="o.recordTitle || o.recordId || 'Unknown Record'"></td>
                 <td class="border-t border-gray-700 px-3 py-2" x-text="o.quantity"></td>
                 <td class="border-t border-gray-700 px-3 py-2" x-text="'$' + Number(o.unitPrice).toFixed(2)"></td>
                 <td class="border-t border-gray-700 px-3 py-2" x-text="'$' + Number(o.totalPrice).toFixed(2)"></td>

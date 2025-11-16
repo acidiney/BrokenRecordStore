@@ -229,7 +229,7 @@
       </div>
       <div class="mt-8">
         <h3 class="text-lg font-semibold mb-2">Recent Orders</h3>
-        <div class="text-sm text-gray-400 mb-2" x-text="orderListLoading ? 'Loading orders...' : ('Total ' + ordersTotal)"></div>
+        <div class="text-sm text-gray-400 mb-2" x-text="orderListLoading ? 'Loading orders...' : ('Page ' + ordersPage + ' of ' + ordersTotalPages + ' • ' + orders.length + ' items loaded')"></div>
         <table class="min-w-full text-sm border border-gray-700 rounded-lg overflow-hidden bg-gray-900">
           <thead>
             <tr>
@@ -252,10 +252,22 @@
             </template>
           </tbody>
         </table>
-        <div class="flex items-center gap-3 mt-3">
-          <button class="px-3 py-1 rounded-md border border-gray-700 bg-gray-800 text-gray-100 disabled:opacity-50 disabled:cursor-not-allowed" :disabled="ordersPage<=1 || orderListLoading" @click="ordersPrevPage">Prev</button>
-          <div class="text-gray-300 text-sm">Page <span x-text="ordersPage"></span></div>
-          <button class="px-3 py-1 rounded-md border border-gray-700 bg-gray-800 text-gray-100 disabled:opacity-50 disabled:cursor-not-allowed" :disabled="ordersPage>=ordersTotalPages || orderListLoading" @click="ordersNextPage">Next</button>
+        <div class="flex items-center justify-between mt-3">
+          <div class="flex items-center gap-3">
+            <button class="px-3 py-2 rounded-md border border-gray-700 bg-gray-800 text-gray-100 disabled:opacity-50 disabled:cursor-not-allowed" :disabled="ordersPage<=1 || orderListLoading" @click="ordersPrevPage">Prev</button>
+            <div class="text-gray-300 text-sm">Page <span x-text="ordersPage"></span> / <span x-text="ordersTotalPages"></span></div>
+            <button class="px-3 py-2 rounded-md border border-gray-700 bg-gray-800 text-gray-100 disabled:opacity-50 disabled:cursor-not-allowed" :disabled="ordersPage>=ordersTotalPages || orderListLoading" @click="ordersNextPage">Next</button>
+          </div>
+          <div class="flex items-center gap-2">
+            <label class="text-sm text-gray-300">Per page</label>
+            <select class="bg-gray-900 border border-gray-700 rounded-md px-2 py-1 text-gray-100" x-model.number="ordersPerPage" @change="ordersPage=1; loadOrders()">
+              <option :value="10">10</option>
+              <option :value="20">20</option>
+              <option :value="50">50</option>
+              <option :value="100">100</option>
+            </select>
+            <div class="text-sm text-gray-400">Total: <span x-text="ordersTotal"></span></div>
+          </div>
         </div>
       </div>
     </section>

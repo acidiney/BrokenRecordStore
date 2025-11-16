@@ -43,7 +43,7 @@
       <h2>Dashboard</h2>
       <div class="row">
         <div>
-          <div>Records loaded: <span x-text="records.length"></span></div>
+          <div>Records: <span x-text="total"></span></div>
           <div>Last loaded: <span x-text="lastLoaded"></span></div>
           <button @click="load()">Reload</button>
         </div>
@@ -55,9 +55,9 @@
       <div class="row">
         <div>
           <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-            <label class="block text-sm font-medium">Search<input class="mt-1 block w-full bg-gray-900 border border-gray-700 rounded-md px-3 py-2 text-gray-100 placeholder-gray-400" type="text" x-model="search" placeholder="Beatles, Abbey Road..."></label>
+            <label class="block text-sm font-medium">Search<input class="mt-1 block w-full bg-gray-900 border border-gray-700 rounded-md px-3 py-2 text-gray-100 placeholder-gray-400" type="text" x-model="search" @keyup.enter="currentPage=1; load()" @blur="currentPage=1; load()" placeholder="Beatles, Abbey Road..."></label>
             <label class="block text-sm font-medium">Format
-              <select class="mt-1 block w-full bg-gray-900 border border-gray-700 rounded-md px-3 py-2 text-gray-100" x-model="formatFilter">
+              <select class="mt-1 block w-full bg-gray-900 border border-gray-700 rounded-md px-3 py-2 text-gray-100" x-model="formatFilter" @change="currentPage=1; load()">
                 <option value="">Any</option>
                 <option>Vinyl</option>
                 <option>CD</option>
@@ -66,7 +66,7 @@
               </select>
             </label>
             <label class="block text-sm font-medium">Category
-              <select class="mt-1 block w-full bg-gray-900 border border-gray-700 rounded-md px-3 py-2 text-gray-100" x-model="categoryFilter">
+              <select class="mt-1 block w-full bg-gray-900 border border-gray-700 rounded-md px-3 py-2 text-gray-100" x-model="categoryFilter" @change="currentPage=1; load()">
                 <option value="">Any</option>
                 <option>Rock</option>
                 <option>Jazz</option>
@@ -78,7 +78,7 @@
               </select>
             </label>
             <label class="block text-sm font-medium">Sort
-              <select class="mt-1 block w-full bg-gray-900 border border-gray-700 rounded-md px-3 py-2 text-gray-100" x-model="sortParam">
+              <select class="mt-1 block w-full bg-gray-900 border border-gray-700 rounded-md px-3 py-2 text-gray-100" x-model="sortParam" @change="currentPage=1; load()">
                 <option value="created">Created</option>
                 <option value="price">Price</option>
                 <option value="relevance">Relevance</option>

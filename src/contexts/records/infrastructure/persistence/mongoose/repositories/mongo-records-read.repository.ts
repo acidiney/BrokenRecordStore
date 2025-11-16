@@ -17,10 +17,10 @@ export class MongoRecordsReadRepository implements RecordsReadRepository {
       filter.$text = { $search: query.search };
     }
     if (query?.category) {
-      filter.category = query.category;
+      filter.category = query.category.toUpperCase();
     }
     if (query?.format) {
-      filter.format = query.format;
+      filter.format = query.format.toUpperCase();
     }
     return filter;
   }

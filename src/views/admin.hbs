@@ -227,6 +227,37 @@
           </div>
         </div>
       </div>
+      <div class="mt-8">
+        <h3 class="text-lg font-semibold mb-2">Recent Orders</h3>
+        <div class="text-sm text-gray-400 mb-2" x-text="orderListLoading ? 'Loading orders...' : ('Total ' + ordersTotal)"></div>
+        <table class="min-w-full text-sm border border-gray-700 rounded-lg overflow-hidden bg-gray-900">
+          <thead>
+            <tr>
+              <th class="border-b border-gray-700 bg-gray-800 px-3 py-2 text-left">Record</th>
+              <th class="border-b border-gray-700 bg-gray-800 px-3 py-2 text-left">Qty</th>
+              <th class="border-b border-gray-700 bg-gray-800 px-3 py-2 text-left">Unit</th>
+              <th class="border-b border-gray-700 bg-gray-800 px-3 py-2 text-left">Total</th>
+              <th class="border-b border-gray-700 bg-gray-800 px-3 py-2 text-left">Created</th>
+            </tr>
+          </thead>
+          <tbody>
+            <template x-for="o in orders" :key="o.id">
+              <tr>
+                <td class="border-t border-gray-700 px-3 py-2" x-text="o.recordId"></td>
+                <td class="border-t border-gray-700 px-3 py-2" x-text="o.quantity"></td>
+                <td class="border-t border-gray-700 px-3 py-2" x-text="'$' + Number(o.unitPrice).toFixed(2)"></td>
+                <td class="border-t border-gray-700 px-3 py-2" x-text="'$' + Number(o.totalPrice).toFixed(2)"></td>
+                <td class="border-t border-gray-700 px-3 py-2" x-text="new Date(o.created||Date.now()).toLocaleString()"></td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+        <div class="flex items-center gap-3 mt-3">
+          <button class="px-3 py-1 rounded-md border border-gray-700 bg-gray-800 text-gray-100 disabled:opacity-50 disabled:cursor-not-allowed" :disabled="ordersPage<=1 || orderListLoading" @click="ordersPrevPage">Prev</button>
+          <div class="text-gray-300 text-sm">Page <span x-text="ordersPage"></span></div>
+          <button class="px-3 py-1 rounded-md border border-gray-700 bg-gray-800 text-gray-100 disabled:opacity-50 disabled:cursor-not-allowed" :disabled="ordersPage>=ordersTotalPages || orderListLoading" @click="ordersNextPage">Next</button>
+        </div>
+      </div>
     </section>
 
     <div x-cloak x-show="showEditModal" x-transition.opacity @keydown.escape.window="showEditModal=false" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" @click="showEditModal=false">
@@ -363,6 +394,12 @@
         orderRecordLoading: false,
         orderRecordSelected: null,
         orderRecordSearchTimer: null,
+        orders: [],
+        ordersPage: 1,
+        ordersPerPage: 20,
+        ordersTotal: 0,
+        ordersTotalPages: 1,
+        orderListLoading: false,
         async load(){
           try{
             this.loading = true;
@@ -389,8 +426,27 @@
           const saved = typeof localStorage !== 'undefined' ? localStorage.getItem('adminPage') : null;
           if(saved){ this.page = saved; }
           if(this.page === 'records' || this.page === 'dashboard'){ this.load(); }
+          if(this.page === 'orders'){ this.loadOrders(); }
         },
-        setPage(p){ this.page = p; if(typeof localStorage !== 'undefined'){ localStorage.setItem('adminPage', p); } if(p === 'records' || p === 'dashboard'){ this.load(); } },
+        setPage(p){ this.page = p; if(typeof localStorage !== 'undefined'){ localStorage.setItem('adminPage', p); } if(p === 'records' || p === 'dashboard'){ this.load(); } if(p === 'orders'){ this.ordersPage = 1; this.loadOrders(); } },
+        ordersNextPage(){ if(this.ordersPage < this.ordersTotalPages){ this.ordersPage++; this.loadOrders(); } },
+        ordersPrevPage(){ if(this.ordersPage > 1){ this.ordersPage--; this.loadOrders(); } },
+        async loadOrders(){
+          try{
+            this.orderListLoading = true;
+            const params = new URLSearchParams();
+            params.set('page', String(this.ordersPage));
+            params.set('pageSize', String(this.ordersPerPage));
+            const r = await fetch('/orders?' + params.toString());
+            const json = await r.json();
+            this.orders = Array.isArray(json.data) ? json.data : [];
+            this.ordersTotal = Number(json.total || 0);
+            this.ordersPerPage = Number(json.perPage || this.ordersPerPage);
+            this.ordersTotalPages = Math.max(1, Math.ceil(this.ordersTotal / this.ordersPerPage));
+          }finally{
+            this.orderListLoading = false;
+          }
+        },
         openCreateModal(){ this.resetCreate(); this.showCreateModal = true; },
         resetCreate(){ this.cr = { artist: '', album: '', price: '', qty: '', format: 'Vinyl', category: 'Rock', mbid: '' }; this.createStatus = ''; },
         nextPage(){ if(this.currentPage < this.totalPages){ this.currentPage++; this.load(); } },
@@ -459,6 +515,18 @@
             const res = await fetch('/orders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ recordId: this.order.recordId, quantity: Number(this.order.quantity) }) });
             if(!res.ok){ throw new Error('Failed to create order'); }
             this.orderStatus = 'Order created';
+            const placedQty = Number(this.order.quantity)||0;
+            if(this.orderRecordSelected){
+              const nextQty = Math.max(0, Number(this.orderRecordSelected.qty||0) - placedQty);
+              this.orderRecordSelected = Object.assign({}, this.orderRecordSelected, { qty: nextQty });
+              const idx = this.orderRecordOptions.findIndex((x) => x.id === this.orderRecordSelected.id);
+              if(idx >= 0){
+                const cur = this.orderRecordOptions[idx];
+                this.orderRecordOptions.splice(idx, 1, Object.assign({}, cur, { qty: nextQty }));
+              }
+            }
+            this.order.quantity = '';
+            await this.loadOrders();
           }catch(e){ this.orderStatus = e.message; }
         }
       }

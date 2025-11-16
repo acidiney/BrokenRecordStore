@@ -888,29 +888,30 @@
       }
     }
   </script>
-  <script src="https://browser.sentry-cdn.com/10.25.0/bundle.tracing.min.js"
-    integrity="sha384-ZnNH0KFLL1qhpW7xlNYoeY2bdcreONValnCXb3f5fOQTkvw9FEJcY9sCNSdX8VWu"
-    crossorigin="anonymous"></script>
-  <script>
-    Sentry.init({
-      dsn: "https://58a69b7a809e3ca90800406311051fcb@o4510375818887168.ingest.de.sentry.io/4510375821508688",
-      sendDefaultPii: true,
-      integrations: [
-        Sentry.browserTracingIntegration(),
-        Sentry.replayIntegration(),
-        Sentry.feedbackIntegration({
-          colorScheme: "system",
-        }),
-      ],
-      enableLogs: true,
-      tracesSampleRate: 1.0,
-      tracePropagationTargets: ["localhost", "https://brokenrecordstore.onrender.com/api"],
-      replaysSessionSampleRate: 0.1,
-      replaysOnErrorSampleRate: 1.0,
-    });
 
-    Sentry.metrics.count("button_click", 1);
-    Sentry.metrics.gauge("queue_depth", 42);
+  <script src="https://js-de.sentry-cdn.com/58a69b7a809e3ca90800406311051fcb.min.js" crossorigin="anonymous"></script>
+  <script>
+    window.sentryOnLoad = function () {
+      Sentry.init({
+        dsn: "https://58a69b7a809e3ca90800406311051fcb@o4510375818887168.ingest.de.sentry.io/4510375821508688",
+        sendDefaultPii: true,
+        integrations: [
+          Sentry.browserTracingIntegration(),
+          Sentry.replayIntegration(),
+          Sentry.feedbackIntegration({
+            colorScheme: "system",
+          }),
+        ],
+        enableLogs: true,
+        tracesSampleRate: 1.0,
+        tracePropagationTargets: ["localhost", "https://brokenrecordstore.onrender.com/api"],
+        replaysSessionSampleRate: 0.1,
+        replaysOnErrorSampleRate: 1.0,
+      });
+
+      Sentry.metrics.count("button_click", 1);
+      Sentry.metrics.gauge("queue_depth", 42);
+    }
   </script>
 </body>
 

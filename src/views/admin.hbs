@@ -311,6 +311,7 @@
             if(!res.ok){ throw new Error('Failed to create record'); }
             this.createStatus = 'Created';
             await this.load();
+            this.showCreateModal = false;
           }catch(e){ this.createStatus = e.message; }
         },
         async updateRecord(){

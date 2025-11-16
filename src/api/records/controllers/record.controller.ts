@@ -3,6 +3,7 @@ import {
   Body,
   Controller,
   Get,
+  HttpCode,
   Inject,
   Param,
   Post,
@@ -168,6 +169,7 @@ export class RecordController {
   }
 
   @Post('mbid/search')
+  @HttpCode(200)
   @ApiOperation({ summary: 'Lookup MBID by artist and album' })
   @ApiResponse({ status: 200, description: 'MBID found or not' })
   async searchMbid(

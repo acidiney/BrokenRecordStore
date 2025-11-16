@@ -5,7 +5,7 @@
   "compilerOptions": {
     "deleteOutDir": true,
     "assets": [
-      { "include": "views/**/*", "outDir": "dist/src" }
+      { "include": "views/**/*", "outDir": "dist" }
     ],
     "watchAssets": true
   }

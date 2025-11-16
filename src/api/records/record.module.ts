@@ -17,6 +17,7 @@ import { RECORDS_READ_REPOSITORY } from '../../contexts/records/domain/repositor
 import { RECORDS_REPOSITORY } from '../../contexts/records/domain/repositories/records.repository';
 import { MongoRecordsReadRepository } from '../../contexts/records/infrastructure/persistence/mongoose/repositories/mongo-records-read.repository';
 import { MongoRecordsRepository } from '../../contexts/records/infrastructure/persistence/mongoose/repositories/mongo-records.repository';
+import { RecordsTracklistLoader } from '../../infrastructure/loaders/records-tracklist.loader';
 import { RecordController } from './controllers/record.controller';
 
 @Module({
@@ -35,6 +36,7 @@ import { RecordController } from './controllers/record.controller';
     CreateRecordUseCase,
     UpdateRecordUseCase,
     ListRecordsUseCase,
+    RecordsTracklistLoader,
   ],
 })
 export class RecordModule implements OnModuleInit {

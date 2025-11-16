@@ -2,14 +2,19 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'; // Import Swagger
-import { join } from 'path';
+import { resolve } from 'path';
 import { AppConfig } from './app.config';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  app.setBaseViewsDir(join(__dirname, 'views'));
+  const viewPath =
+    process.env.NODE_ENV === 'development'
+      ? resolve(__dirname, '..', 'views') // On development it adds src to the path, so we need to go up one level
+      : resolve(__dirname, 'views');
+
+  app.setBaseViewsDir(viewPath);
   app.setViewEngine('hbs');
 
   app.useGlobalPipes(

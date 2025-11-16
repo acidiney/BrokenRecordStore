@@ -1,10 +1,12 @@
 import { Controller, Get, Redirect } from '@nestjs/common';
+import { ApiExcludeEndpoint, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import * as Sentry from '@sentry/nestjs';
 
 @Controller()
 export class AppController {
   @Get()
   @Redirect('/admin', 302)
+  @ApiExcludeEndpoint()
   root(): void {
     Sentry.startSpan(
       { name: 'RedirectController#root', op: 'controller' },
@@ -13,6 +15,11 @@ export class AppController {
   }
 
   @Get('health')
+  @ApiOperation({ summary: 'Health check' })
+  @ApiResponse({
+    status: 200,
+    description: 'Health check',
+  })
   health() {
     return Sentry.startSpan(
       { name: 'AppController#health', op: 'controller' },

@@ -66,7 +66,7 @@ export function setup() {
   if (res.status !== 201) {
     throw new Error(`Failed to create target record: status=${res.status}`);
   }
-  const id = res.json().id || res.json()._id;
+  const id = res.json().id;
 
   const list = http.get(`${base}/records?pageSize=50&sort=created`);
   let ids = [];

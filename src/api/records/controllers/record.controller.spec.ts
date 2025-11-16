@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { CacheModule } from '@nestjs/cache-manager';
 
 import { CreateRecordUseCase } from '@/contexts/records/application/create-record.usecase';
 import { ListRecordsUseCase } from '@/contexts/records/application/list-records.usecase';
@@ -20,6 +21,7 @@ describe('RecordController', () => {
     listRecords = { execute: jest.fn() };
 
     const module: TestingModule = await Test.createTestingModule({
+      imports: [CacheModule.register()],
       controllers: [RecordController],
       providers: [
         { provide: CreateRecordUseCase, useValue: createRecord },

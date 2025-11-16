@@ -1,4 +1,14 @@
-import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
+import { CacheTTL } from '@nestjs/cache-manager';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Put,
+  Query,
+  UseInterceptors,
+} from '@nestjs/common';
 import { ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
 
 import { CreateRecordRequestDTO } from '../dtos/create-record.request.dto';
@@ -14,6 +24,7 @@ import { RecordCategory } from '@/contexts/records/domain/enums/record-category.
 import { RecordFormat } from '@/contexts/records/domain/enums/record-format.enum';
 import { ListRecordsQuery } from '@/contexts/records/domain/queries/list-records.query';
 import { RecordSortParam } from '@/contexts/records/domain/queries/sort.types';
+import { CustomCacheInterceptor } from '@/infrastructure/cache/custom-cache.interceptor';
 
 @Controller('records')
 export class RecordController {
@@ -118,6 +129,8 @@ export class RecordController {
     description: 'Sort by: relevance (text search), price, or created',
     enum: ['relevance', 'price', 'created'],
   })
+  @UseInterceptors(CustomCacheInterceptor)
+  @CacheTTL(300)
   async findAll(
     @Query('q') q?: string,
     @Query('artist') artist?: string,

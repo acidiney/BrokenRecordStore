@@ -1,4 +1,5 @@
 import { MbidCacheRepository } from '@/contexts/records/domain/repositories/mbid-cache.repository';
+import { Tracklist } from '@/contexts/records/domain/types/tracklist.type';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { MBIDCache } from '../schemas/mbid-cache.schema';
@@ -8,7 +9,7 @@ export class MongoMbidCacheRepository implements MbidCacheRepository {
     @InjectModel('MBIDCache') private readonly model: Model<MBIDCache>,
   ) {}
 
-  async findTracklist(mbid: string): Promise<string[] | null> {
+  async findTracklist(mbid: string): Promise<Tracklist[] | null> {
     const now = new Date();
 
     const doc = await this.model
@@ -23,7 +24,7 @@ export class MongoMbidCacheRepository implements MbidCacheRepository {
 
   async upsertTracklist(
     mbid: string,
-    tracklist: string[],
+    tracklist: Tracklist[],
     ttlDays: number,
   ): Promise<void> {
     const fetchedAt = new Date();

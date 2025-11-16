@@ -1,8 +1,10 @@
+import { Tracklist } from '../types/tracklist.type';
+
 export interface MbidCacheRepository {
-  findTracklist(mbid: string): Promise<string[] | null>;
+  findTracklist(mbid: string): Promise<Tracklist[] | null>;
   upsertTracklist(
     mbid: string,
-    tracklist: string[],
+    tracklist: Tracklist[],
     ttlDays: number,
   ): Promise<void>;
 }

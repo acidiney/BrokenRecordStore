@@ -1,3 +1,4 @@
+import { Tracklist } from '@/contexts/records/domain/types/tracklist.type';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 
@@ -6,8 +7,8 @@ export class MBIDCache extends Document {
   @Prop({ required: true, unique: true })
   mbid: string;
 
-  @Prop({ type: [String], required: true, default: [] })
-  tracklist: string[];
+  @Prop({ type: [Object], required: true, default: [] })
+  tracklist: Tracklist[];
 
   @Prop({ required: true })
   fetchedAt: Date;

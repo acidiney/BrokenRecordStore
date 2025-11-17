@@ -1,6 +1,6 @@
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 import * as Sentry from '@sentry/nestjs';
+import { Model } from 'mongoose';
 
 import { RecordModel } from '@/contexts/records/domain/models/record.model';
 import { ListRecordsQuery } from '../../../../domain/queries/list-records.query';
@@ -122,7 +122,17 @@ export class MongoRecordsReadRepository implements RecordsReadRepository {
       { name: 'MongoRecordsReadRepository#findByUnique', op: 'db' },
       async () => {
         const result = await this.recordModel
-          .findOne({ artist, album, format })
+          .findOne({
+            artist: {
+              $regex: artist,
+              $options: 'i',
+            },
+            album: {
+              $regex: album,
+              $options: 'i',
+            },
+            format,
+          })
           .lean()
           .exec();
         return result && this.mapToModel(result);

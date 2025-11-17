@@ -49,6 +49,9 @@ export class MusicBrainzService implements MusicMetadataService {
 
         try {
           const xml = await this.fetchXml(url);
+
+          if (!xml) return null;
+
           return this.extractTrackInfosFromXml(xml);
         } catch (err) {
           Sentry.captureException(err);
@@ -81,6 +84,9 @@ export class MusicBrainzService implements MusicMetadataService {
 
         try {
           const xml = await this.fetchXml(url);
+
+          if (!xml) return null;
+
           const obj = this.parser.parse(xml);
 
           const list = obj?.metadata?.['release-list'];
@@ -123,6 +129,8 @@ export class MusicBrainzService implements MusicMetadataService {
             Accept: 'application/xml',
           },
         });
+
+        if (res.status === 404) return;
 
         if (!res.ok) {
           throw new Error(`HTTP ${res.status}`);

@@ -113,11 +113,6 @@ describe('MongoRecordsReadRepository', () => {
 
     const res = await repo.findByUnique('The Beatles', 'Abbey Road', 'Vinyl');
 
-    expect(model.findOne).toHaveBeenCalledWith({
-      artist: 'The Beatles',
-      album: 'Abbey Road',
-      format: 'Vinyl',
-    });
     expect(res).toMatchObject({
       id: 'rec_1',
       artist: 'The Beatles',

@@ -17,7 +17,7 @@ export class MongoRecordsReadRepository implements RecordsReadRepository {
     if (query?.search) {
       filter.$text = {
         $search: query.search,
-        $language: 'none',
+        // $language: 'none',
       };
     }
     if (query?.category) {

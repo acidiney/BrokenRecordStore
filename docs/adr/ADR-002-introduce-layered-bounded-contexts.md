@@ -22,7 +22,6 @@ Adopt a **domain-centric Modular Monolith** with the following structure and pri
 
 - **Repositories** are interfaces defined in the **Domain** and implemented in the **Infrastructure**.
 - **Cross-context references are ID** (`Orders` holds `RecordId`).
-- **Ports and Adapters**: The `Orders` domain defines the **`RecordsAvailabilityPort`** (a port) to check/reserve stock. This boundary contract is non-negotiable and is fulfilled by an **in-process adapter** in the infrastructure layer.
 
 ### 3. Composition
 

@@ -10,6 +10,15 @@ export class MBIDCache extends Document {
   @Prop({ type: [Object], required: true, default: [] })
   tracklist: Tracklist[];
 
+  @Prop({ required: false })
+  artist?: string;
+
+  @Prop({ required: false })
+  album?: string;
+
+  @Prop({ required: false })
+  coverImage?: string;
+
   @Prop({ required: true })
   fetchedAt: Date;
 
@@ -26,3 +35,4 @@ MBIDCacheSchema.index(
   { expiresAt: 1 },
   { expireAfterSeconds: 0, name: 'ttl_expiresAt' },
 );
+MBIDCacheSchema.index({ artist: 1, album: 1 }, { name: 'idx_artist_album' });

@@ -78,6 +78,10 @@ export class RecordPresenter {
   @ValidateNested({ each: true })
   tracklist: ReadonlyArray<TracklistPresenter>;
 
+  @Expose()
+  @ApiProperty({ description: 'Cover image URL', example: 'https://...' })
+  coverImage?: string;
+
   static fromOutput(model: RecordOutput): RecordPresenter {
     const presenter = new RecordPresenter();
 
@@ -94,6 +98,7 @@ export class RecordPresenter {
     presenter.tracklist = (model.tracklist ?? []).map((track) =>
       TracklistPresenter.fromOutput(track),
     );
+    presenter.coverImage = model.coverImage;
 
     return presenter;
   }

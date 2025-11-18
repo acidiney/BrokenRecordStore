@@ -69,7 +69,8 @@ export class MongoRecordsReadRepository implements RecordsReadRepository {
       created: record.created,
       lastModified: record.lastModified,
       mbid: record.mbid,
-      tracklist: (record as any).tracklist,
+      tracklist: record.tracklist,
+      coverImage: record.coverImage,
     };
   }
 

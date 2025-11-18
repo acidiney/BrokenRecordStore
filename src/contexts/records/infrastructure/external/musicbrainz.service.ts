@@ -15,6 +15,7 @@ export class MusicBrainzService implements MusicMetadataService {
   private readonly USER_AGENT = 'BrokenRecordStore/1.0';
   private readonly DEFAULT_INC = 'recordings';
   private readonly DEFAULT_FMT = 'xml';
+  private readonly COVER_ART_BASE_URL = 'https://coverartarchive.org/release/';
 
   private readonly parser = new XMLParser({
     ignoreAttributes: false,
@@ -119,6 +120,26 @@ export class MusicBrainzService implements MusicMetadataService {
     );
   }
 
+  async fetchCoverImageByMbid(mbid: MBID): Promise<string | null> {
+    return Sentry.startSpan(
+      { name: 'MusicBrainzService#fetchCoverImageByMbid', op: 'external' },
+      async () => {
+        try {
+          const cached = await this.cacheRepo.findCoverImage(mbid.toString());
+          if (cached) return cached;
+          const url = await this.fetchCoverArtUrl(mbid.toString());
+          if (url) {
+            await this.cacheRepo.upsertCoverImage(mbid.toString(), url, 7);
+          }
+          return url;
+        } catch (err) {
+          Sentry.captureException(err);
+          return null;
+        }
+      },
+    );
+  }
+
   private async fetchXml(url: URL): Promise<string> {
     return Sentry.startSpan(
       { name: 'MusicBrainzService#fetchXml', op: 'external' },
@@ -179,8 +200,16 @@ export class MusicBrainzService implements MusicMetadataService {
       }
     }
 
-    // Cache the tracklist for 7 days
     await this.cacheRepo.upsertTracklist(release.id, out, 7);
+
+    try {
+      const coverUrl = await this.fetchCoverArtUrl(release.id);
+      if (coverUrl) {
+        await this.cacheRepo.upsertCoverImage(release.id, coverUrl, 7);
+      }
+    } catch (err) {
+      Sentry.captureException(err);
+    }
 
     return out;
   }
@@ -190,5 +219,44 @@ export class MusicBrainzService implements MusicMetadataService {
     const m = Math.floor(total / 60);
     const s = total % 60;
     return `${m}:${s.toString().padStart(2, '0')}`;
+  }
+
+  private async fetchCoverArtUrl(releaseId: string): Promise<string | null> {
+    return Sentry.startSpan(
+      { name: 'MusicBrainzService#fetchCoverArtUrl', op: 'external' },
+      async () => {
+        try {
+          const url = new URL(releaseId, this.COVER_ART_BASE_URL);
+          const res = await fetch(url, {
+            headers: {
+              'User-Agent': this.USER_AGENT,
+              Accept: 'application/json',
+            },
+          });
+
+          if (res.status === 404) return null;
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+          const json = await res.json();
+          const images = Array.isArray(json?.images) ? json.images : [];
+
+          const primary = images.find((img: any) => img?.front) || images[0];
+
+          if (!primary) return null;
+
+          const thumb =
+            primary?.thumbnails?.large || primary?.thumbnails?.small;
+
+          const full = primary?.image;
+
+          const chosen = thumb || full;
+
+          return chosen || null;
+        } catch (err) {
+          Sentry.captureException(err);
+          return null;
+        }
+      },
+    );
   }
 }

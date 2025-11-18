@@ -6,6 +6,8 @@ describe('MusicBrainzService', () => {
   const cacheRepo: MbidCacheRepository = {
     findTracklist: jest.fn().mockResolvedValue(null),
     upsertTracklist: jest.fn().mockResolvedValue(undefined),
+    findCoverImage: jest.fn().mockResolvedValue(null),
+    upsertCoverImage: jest.fn().mockResolvedValue(undefined),
     findReleaseMbid: jest.fn().mockResolvedValue(null),
     updateReleaseMbid: jest.fn().mockResolvedValue(undefined),
   };
@@ -30,8 +32,19 @@ describe('MusicBrainzService', () => {
           </medium-list>
         </release>
       </metadata>`;
-
-    global.fetch = jest.fn().mockResolvedValue({ ok: true, text: () => xml });
+    const cover = {
+      images: [
+        {
+          front: true,
+          image: 'http://img/full.jpg',
+          thumbnails: { large: 'http://img/large.jpg' },
+        },
+      ],
+    };
+    global.fetch = jest
+      .fn()
+      .mockResolvedValueOnce({ ok: true, text: () => xml })
+      .mockResolvedValueOnce({ ok: true, json: () => cover });
 
     const titles = await service.fetchTrackInfosByMbid(
       MBID.from('b10bbbfc-cf9e-42e0-be17-e2c3e1d2600d'),
@@ -98,13 +111,30 @@ describe('MusicBrainzService', () => {
           </medium-list>
         </release>
       </metadata>`;
-    global.fetch = jest.fn().mockResolvedValue({ ok: true, text: () => xml });
+    const cover = {
+      images: [
+        {
+          front: true,
+          image: 'http://img/full.jpg',
+          thumbnails: { large: 'http://img/large.jpg' },
+        },
+      ],
+    };
+    global.fetch = jest
+      .fn()
+      .mockResolvedValueOnce({ ok: true, text: () => xml })
+      .mockResolvedValueOnce({ ok: true, json: () => cover });
     await service.fetchTrackInfosByMbid(
       MBID.from('b10bbbfc-cf9e-42e0-be17-e2c3e1d2600d'),
     );
     expect(cacheRepo.upsertTracklist).toHaveBeenCalledWith(
       'rel-1',
       [{ title: 'Song A', length: '1:05', releaseDate: '1969-09-26' }],
+      7,
+    );
+    expect(cacheRepo.upsertCoverImage).toHaveBeenCalledWith(
+      'rel-1',
+      'http://img/large.jpg',
       7,
     );
   });

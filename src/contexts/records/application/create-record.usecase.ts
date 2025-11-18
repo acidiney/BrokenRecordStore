@@ -51,6 +51,10 @@ export class CreateRecordUseCase {
 
         const created = await this.repo.create({ ...dto, tracklist });
         this.events.emit('cache.invalidate', '/records');
+        this.events.emit('records.coverart.fetch', {
+          id: created.id,
+          mbid: dto.mbid?.toString(),
+        });
         return RecordOutput.fromModel(created);
       },
     );

@@ -12,4 +12,5 @@ export interface RecordModel {
   lastModified?: Date;
   mbid?: string;
   tracklist?: Tracklist[];
+  coverImage?: string;
 }

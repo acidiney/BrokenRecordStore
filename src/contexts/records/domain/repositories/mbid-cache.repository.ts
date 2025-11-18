@@ -7,6 +7,12 @@ export interface MbidCacheRepository {
     tracklist: Tracklist[],
     ttlDays: number,
   ): Promise<void>;
+  findCoverImage(mbid: string): Promise<string | null>;
+  upsertCoverImage(
+    mbid: string,
+    imageUrl: string,
+    ttlDays: number,
+  ): Promise<void>;
   findReleaseMbid(artist: string, album: string): Promise<string | null>;
   updateReleaseMbid(
     artist: string,

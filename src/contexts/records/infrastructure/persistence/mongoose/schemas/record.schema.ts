@@ -36,6 +36,9 @@ export class Record extends Document {
 
   @Prop({ type: [Object], required: false, default: [] })
   tracklist?: Tracklist[];
+
+  @Prop({ required: false })
+  coverImage?: string;
 }
 
 export type RecordDocument = Record & Document;

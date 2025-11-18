@@ -13,6 +13,7 @@ export class RecordOutput {
   lastModified?: Date;
   mbid?: string;
   tracklist?: Tracklist[];
+  coverImage?: string;
 
   constructor(props: RecordModel) {
     this.id = props.id;
@@ -26,6 +27,7 @@ export class RecordOutput {
     this.lastModified = props.lastModified;
     this.mbid = props.mbid?.toString();
     this.tracklist = props.tracklist ?? [];
+    this.coverImage = props.coverImage;
   }
 
   static fromModel(model: RecordModel): RecordOutput {

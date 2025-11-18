@@ -20,6 +20,7 @@ import { MongoRecordsRepository } from '../../contexts/records/infrastructure/pe
 import { RecordsTracklistLoader } from '../../infrastructure/loaders/records-tracklist.loader';
 import { RecordController } from './controllers/record.controller';
 import * as Sentry from '@sentry/nestjs';
+import { RecordCoverArtListener } from '@/infrastructure/listeners/record-coverart.listener';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import * as Sentry from '@sentry/nestjs';
     UpdateRecordUseCase,
     ListRecordsUseCase,
     RecordsTracklistLoader,
+    RecordCoverArtListener,
   ],
 })
 export class RecordModule implements OnModuleInit {

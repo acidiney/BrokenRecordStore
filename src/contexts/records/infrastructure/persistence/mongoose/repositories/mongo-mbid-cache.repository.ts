@@ -41,6 +41,36 @@ export class MongoMbidCacheRepository implements MbidCacheRepository {
       .exec();
   }
 
+  async findCoverImage(mbid: string): Promise<string | null> {
+    const now = new Date();
+
+    const doc = await this.model
+      .findOne({ mbid, expiresAt: { $gt: now } })
+      .lean()
+      .exec();
+
+    if (!doc) return null;
+
+    return doc.coverImage ?? null;
+  }
+
+  async upsertCoverImage(
+    mbid: string,
+    imageUrl: string,
+    ttlDays: number,
+  ): Promise<void> {
+    const fetchedAt = new Date();
+    const expiresAt = new Date(fetchedAt.getTime() + ttlDays * PER_DAY_MS);
+
+    await this.model
+      .updateOne(
+        { mbid },
+        { $set: { coverImage: imageUrl, mbid, fetchedAt, expiresAt } },
+        { upsert: true },
+      )
+      .exec();
+  }
+
   async findReleaseMbid(artist: string, album: string): Promise<string | null> {
     const now = new Date();
 

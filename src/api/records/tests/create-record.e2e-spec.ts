@@ -156,11 +156,13 @@ describe('RecordController (e2e)', () => {
         {
           title: 'Track 1',
           length: '3:30',
+          slug: 'track-1330',
           releaseDate: '2023-01-01',
         },
         {
           title: 'Track 2',
           length: '4:00',
+          slug: 'track-2400',
           releaseDate: '2023-01-02',
         },
       ]);

@@ -7,6 +7,7 @@ export class OrderOutput {
   quantity?: number;
   totalPrice?: number;
   unitPrice?: number;
+  created?: Date;
 
   constructor(props: OrderModel) {
     this.id = props.id;
@@ -15,6 +16,7 @@ export class OrderOutput {
     this.quantity = props.quantity;
     this.totalPrice = props.totalPrice;
     this.unitPrice = props.unitPrice;
+    this.created = props.created;
   }
 
   static fromModel(model: OrderModel): OrderOutput {

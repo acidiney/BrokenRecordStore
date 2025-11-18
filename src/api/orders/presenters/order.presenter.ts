@@ -35,6 +35,11 @@ export class OrderPresenter {
   @IsDecimal()
   unitPrice: number;
 
+  @Expose()
+  @ApiProperty({ description: 'Order creation date' })
+  @IsNotEmpty()
+  created: Date;
+
   static fromOutput(model: OrderOutput): OrderPresenter {
     const presenter = new OrderPresenter();
     presenter.id = model.id;
@@ -43,6 +48,7 @@ export class OrderPresenter {
     presenter.quantity = model.quantity;
     presenter.totalPrice = model.totalPrice;
     presenter.unitPrice = model.unitPrice;
+    presenter.created = model.created;
 
     return presenter;
   }

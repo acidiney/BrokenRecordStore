@@ -15,7 +15,7 @@ Adopt a **domain-centric Modular Monolith** with the following structure and pri
 - Establish **Bounded Contexts** for `Records` and `Orders`.
 - Implement three clear layers within each context, but with differing levels of initial strictness:
   - **Domain**: (**Repository Interfaces**). Must be framework-agnostic.
-  - **Application**: Use Cases (Commands/Queries) orchestrate Domain logic and define \*\*Transactional Boundaries.
+  - **Application**: Use Cases orchestrate Domain logic and define Transactional Boundaries.
   - **Infrastructure**: Adapters (Mongoose implementations).
 
 ### 2. Hexagonal & Cross-Context Interaction
